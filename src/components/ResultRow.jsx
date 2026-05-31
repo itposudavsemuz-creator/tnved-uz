@@ -1,23 +1,23 @@
 import { memo } from "react";
 
-// Цвета уровней иерархии ТН ВЭД
 const LEVEL_COLORS = {
-  2:  { bg: "#1e3a5f", text: "#93c5fd", border: "#2d5a9e" }, // Группа (2 знака)
-  4:  { bg: "#1a3a2f", text: "#6ee7b7", border: "#1a5c44" }, // Позиция (4 знака)
-  6:  { bg: "#2d2410", text: "#fcd34d", border: "#6b4c0c" }, // Субпозиция (6 знаков)
-  8:  { bg: "#1f1635", text: "#c4b5fd", border: "#4c1d95" }, // Подсубпозиция (8 знаков)
-  10: { bg: "#1f1635", text: "#d8b4fe", border: "#5b21b6" }, // Товарная позиция (10 знаков)
+  2:  { bg: "#1e3a5f", text: "#93c5fd", border: "#2d5a9e" },
+  4:  { bg: "#1a3a2f", text: "#6ee7b7", border: "#1a5c44" },
+  6:  { bg: "#2d2410", text: "#fcd34d", border: "#6b4c0c" },
+  8:  { bg: "#1f1635", text: "#c4b5fd", border: "#4c1d95" },
+  10: { bg: "#1f1635", text: "#d8b4fe", border: "#5b21b6" },
 };
 
-function getLevelInfo(level) {
+function getLevelInfo(code) {
+  const len = code.length;
   const labels = {
-    2: "Группа",
-    4: "Позиция",
+    2: "Раздел",
+    4: "Товарная позиция",
     6: "Субпозиция",
     8: "Подсубпозиция",
-    10: "Товарная позиция",
+    10: "Код ТН ВЭД",
   };
-  const closest = [2, 4, 6, 8, 10].find((l) => level <= l) || 10;
+  const closest = [2, 4, 6, 8, 10].find((l) => len <= l) || 10;
   return {
     label:  labels[closest] || "Код",
     colors: LEVEL_COLORS[closest] || LEVEL_COLORS[10],
@@ -36,7 +36,7 @@ function highlight(text, query) {
 }
 
 export const ResultRow = memo(function ResultRow({ item, query, onClick }) {
-  const { label, colors } = getLevelInfo(item.level);
+  const { label, colors } = getLevelInfo(item.code);
 
   return (
     <div
@@ -46,7 +46,6 @@ export const ResultRow = memo(function ResultRow({ item, query, onClick }) {
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick?.(item)}
     >
-      {/* Код + уровень */}
       <div style={styles.left}>
         <div
           style={{
@@ -58,22 +57,15 @@ export const ResultRow = memo(function ResultRow({ item, query, onClick }) {
         >
           {item.code}
         </div>
-        <div
-          style={{
-            ...styles.levelBadge,
-            color: colors.text,
-          }}
-        >
+        <div style={{ ...styles.levelBadge, color: colors.text }}>
           {label}
         </div>
       </div>
 
-      {/* Наименование */}
       <div style={styles.name}>
         {highlight(item.name, query)}
       </div>
 
-      {/* Единица измерения и ставка пошлины */}
       <div style={styles.meta}>
         {item.unit && (
           <span style={styles.metaTag}>{item.unit}</span>
